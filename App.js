@@ -1,8 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
-import { useState } from 'react'; // מחקנו את useEffect כי לא צריך אותו בלוגיקה הזו
+import { useState } from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity, Alert } from 'react-native';
 
-// 1. המאגר המתוקן: רק ישראלים ופלסטינים, רק עברית וערבית
 const PROFILES = [
   { 
     id: 1,
@@ -57,25 +56,20 @@ const PROFILES = [
 ];
 
 export default function App() {
-  // השינוי הגדול: במקום לבחור רנדומלי, אנחנו שומרים אינדקס (מספר סידורי)
   const [currentIndex, setCurrentIndex] = useState(0);
-
-  // המשתמש הנוכחי שמוצג על המסך
   const user = PROFILES[currentIndex];
 
-  // פונקציה למעבר למשתמש הבא
   const nextUser = () => {
-    // אם הגענו לסוף הרשימה -> תחזור לראשון (0). אחרת -> תעבור לבא (+1)
     if (currentIndex < PROFILES.length - 1) {
       setCurrentIndex(currentIndex + 1);
     } else {
-      setCurrentIndex(0); // לופ חוזר להתחלה
+      setCurrentIndex(0);
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Language Soulmate 🤝</Text>
+      <Text style={styles.header}>KOL 🤝</Text>
       
       <View style={styles.card}>
         <Image source={{ uri: user.image }} style={styles.image} />
