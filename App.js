@@ -1,105 +1,81 @@
 import { StatusBar } from 'expo-status-bar';
-import { useState } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, Alert } from 'react-native';
-
-const PROFILES = [
-  { 
-    id: 1,
-    name: "Ahmed", 
-    age: 24, 
-    image: "https://randomuser.me/api/portraits/men/32.jpg", 
-    location: "Ramallah", 
-    learns: "Hebrew (Basic)", 
-    native: "Arabic",
-    hobby: "Coding & Hummus" 
-  },
-  { 
-    id: 2,
-    name: "Noa", 
-    age: 22, 
-    image: "https://randomuser.me/api/portraits/women/44.jpg", 
-    location: "Tel Aviv", 
-    learns: "Arabic (Beginner)", 
-    native: "Hebrew",
-    hobby: "Surfing & Art" 
-  },
-  { 
-    id: 3,
-    name: "Ibrahim", 
-    age: 26, 
-    image: "https://randomuser.me/api/portraits/men/22.jpg", 
-    location: "Jerusalem", 
-    learns: "Hebrew (Fluent)", 
-    native: "Arabic",
-    hobby: "Music & Football" 
-  },
-  { 
-    id: 4,
-    name: "Maya", 
-    age: 23, 
-    image: "https://randomuser.me/api/portraits/women/68.jpg", 
-    location: "Haifa", 
-    learns: "Arabic (Intermediate)", 
-    native: "Hebrew",
-    hobby: "Photography" 
-  },
-  { 
-    id: 5,
-    name: "Yussuf", 
-    age: 25, 
-    image: "https://randomuser.me/api/portraits/men/11.jpg", 
-    location: "Nablus", 
-    learns: "Hebrew (Advanced)", 
-    native: "Arabic",
-    hobby: "Reading & Tech" 
-  }
-];
+import { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, Image, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 
 export default function App() {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const user = PROFILES[currentIndex];
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const nextUser = () => {
-    if (currentIndex < PROFILES.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-    } else {
-      setCurrentIndex(0);
+  const fetchUser = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('https://randomuser.me/api/');
+      const data = await response.json();
+      const userData = data.results[0];
+      
+      setUser({
+        name: userData.name.first,
+        age: userData.dob.age,
+        image: userData.picture.large,
+        location: userData.location.city,
+        native: Math.random() > 0.5 ? 'Hebrew' : 'Arabic',
+        learns: Math.random() > 0.5 ? 'Arabic' : 'Hebrew',
+        hobby: 'Language Exchange'
+      });
+    } catch (error) {
+      Alert.alert("Error", "Could not fetch user");
+    } finally {
+      setLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchUser();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#4A90E2" />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>KOL 🤝</Text>
+      <Text style={styles.header}>QOL 🤝</Text>
       
-      <View style={styles.card}>
-        <Image source={{ uri: user.image }} style={styles.image} />
-        
-        <View style={styles.infoContainer}>
-          <View style={styles.nameRow}>
-            <Text style={styles.name}>{user.name}, {user.age}</Text>
-          </View>
+      {user && (
+        <View style={styles.card}>
+          <Image source={{ uri: user.image }} style={styles.image} />
           
-          <Text style={styles.location}>📍 {user.location}</Text>
-          
-          <View style={styles.languageBox}>
-            <Text style={styles.langItem}>🗣 Speaks: <Text style={styles.bold}>{user.native}</Text></Text>
-            <Text style={styles.langItem}>🎓 Learning: <Text style={styles.bold}>{user.learns}</Text></Text>
-          </View>
+          <View style={styles.infoContainer}>
+            <View style={styles.nameRow}>
+              <Text style={styles.name}>{user.name}, {user.age}</Text>
+            </View>
+            
+            <Text style={styles.location}>📍 {user.location}</Text>
+            
+            <View style={styles.languageBox}>
+              <Text style={styles.langItem}>🗣 Speaks: <Text style={styles.bold}>{user.native}</Text></Text>
+              <Text style={styles.langItem}>🎓 Learning: <Text style={styles.bold}>{user.learns}</Text></Text>
+            </View>
 
-          <View style={styles.tag}>
-             <Text style={styles.tagText}>✨ {user.hobby}</Text>
+            <View style={styles.tag}>
+               <Text style={styles.tagText}>✨ {user.hobby}</Text>
+            </View>
           </View>
         </View>
-      </View>
+      )}
 
       <View style={styles.buttonsContainer}>
-        <TouchableOpacity style={[styles.button, styles.passButton]} onPress={nextUser}>
+        <TouchableOpacity style={[styles.button, styles.passButton]} onPress={fetchUser}>
           <Text style={styles.buttonText}>Pass ❌</Text>
         </TouchableOpacity>
         
         <TouchableOpacity 
           style={[styles.button, styles.matchButton]} 
-          onPress={() => Alert.alert("It's a Match! 🎉", `Start chatting with ${user.name} in ${user.learns.split(' ')[0]}!`)}>
+          onPress={() => Alert.alert("Connected! 🎉", `Time to practice with ${user.name}!`)}>
           <Text style={styles.buttonText}>Connect 💬</Text>
         </TouchableOpacity>
       </View>
@@ -111,7 +87,7 @@ export default function App() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f4f4f4', alignItems: 'center', justifyContent: 'center', padding: 20 },
-  header: { fontSize: 26, fontWeight: 'bold', marginBottom: 20, color: '#4A90E2', marginTop: 30 },
+  header: { fontSize: 28, fontWeight: 'bold', marginBottom: 20, color: '#4A90E2', marginTop: 30 },
   card: { width: '100%', height: 500, backgroundColor: 'white', borderRadius: 20, overflow: 'hidden', elevation: 5, marginBottom: 30 },
   image: { width: '100%', height: '55%' },
   infoContainer: { padding: 20 },
